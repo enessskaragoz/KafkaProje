@@ -13,12 +13,29 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - zookeeper
-  java-producer:
+  producer:
     image: openjdk:8
-    command: sh -c "apt-get update && apt-get install -y maven && git clone <your_java_producer_repository_url> /app && cd /app && mvn clean install && java -jar target/your-java-producer-jar.jar"
     volumes:
-      - ./your-java-producer-code:/app
-    depends_on:
-      - kafka
+      - ./producer/target/producer.jar:/producer.jar
+    ports:
+      - "8081:8081"
+    environment:
+      - TWITTER_CONSUMER_KEY=consumer_key
+      - TWITTER_CONSUMER_SECRET=consumer_secret
+      - TWITTER_ACCESS_TOKEN=access_token
+      - TWITTER_ACCESS_TOKEN_SECRET=access_token_secret
+    networks:
+      - app-network
+    command: ["java", "-jar", "/producer.jar"]
+  consumer:
+    image: openjdk:8
+    volumes:
+      - ./consumer/target/consumer.jar:/consumer.jar
+    ports:
+      - "8082:8082"
+    networks:
+      - app-network
+    command: ["java", "-jar", "/consumer.jar"]
+networks:
+  app-network:
+    driver: bridge
