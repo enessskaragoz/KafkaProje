@@ -5,25 +5,20 @@ services:
     ports:
       - "2181:2181"
   kafka:
-    image: wurstmeister/kafka
+    container_name: kafka-container
+    image: confluentinc/cp-kafka:latest
+    user: root
+    depends_on:
+      - zookeeper
     ports:
-      - "9092:9092"
+      - 29092:29092
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-  producer:
-    image: openjdk:8
-    volumes:
-      - ./producer/target/producer.jar:/producer.jar
-    ports:
-      - "8081:8081"
-    environment:
-      - TWITTER_CONSUMER_KEY=consumer_key
-      - TWITTER_CONSUMER_SECRET=consumer_secret
-      - TWITTER_ACCESS_TOKEN=access_token
-      - TWITTER_ACCESS_TOKEN_SECRET=access_token_secret
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - app-network
     command: ["java", "-jar", "/producer.jar"]
