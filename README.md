@@ -1,5 +1,5 @@
 komutlar:
-git clone 
+git clone https://github.com/enessskaragoz/KafkaProje.git
 sudo apt-get update
 sudo apt-get -y install python3-pip
 cd KafkaProje
